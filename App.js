@@ -2,6 +2,7 @@
 import React, { useState, useRef } from "react";
 import { View, Image, Pressable, Text, Alert } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from "@react-navigation/stack";
 import colors from "./src/styles/colors";
 import globalStyles from "./src/styles/global";
@@ -284,7 +285,7 @@ function HomeScreen({ navigation }) {
           <Text style={homeStyles.cardText}>⚙️ Configurações</Text>
         </Pressable>
 
-        <Pressable style={homeStyles.card} onPress={() => alert("Abrir Sobre")}>
+        <Pressable style={homeStyles.card} onPress={() => navigation.navigate("Sobre")} >
           <Text style={homeStyles.cardText}>ℹ️ Sobre</Text>
         </Pressable>
 
@@ -296,7 +297,33 @@ function HomeScreen({ navigation }) {
   );
 }
 
+// Aqui fica a construção da tela Sobre..
+function Sobre() {
+  const navigation = useNavigation();
+
+  return (
+    <View style={StyleSheet.container}>
+
+      <TouchableOpacity onPress={() => navigation.goBack()} style={StyleSheet.backButton}>
+        <Text style={StyleSheet.backButtonText}>← Voltar</Text>
+      </TouchableOpacity>
+
+      <Text style={StyleSheet.title}>Sobre o App</Text>
+      <Text style={StyleSheet.text}>Esse app é feito para ajudar você com...</Text>
+      <Text style={StyleSheet.text}>Versão: 1.0.0</Text>
+      <Text style={StyleSheet.text}>Desenvolvido por: Lucas Joel</Text>
+
+    </View>
+  );
+}
+
 const homeStyles = StyleSheet.create({
+ container:{
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+ },
   menu: {
     marginTop: 20,
     width: "100%",
@@ -333,6 +360,7 @@ export default function App() {
         <Stack.Screen name="Registrar" component={RegisterScreen} />
         <Stack.Screen name="Redefinir Senha" component={ResetPasswordScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Sobre" component={Sobre} />
       </Stack.Navigator>
     </NavigationContainer>
   );
