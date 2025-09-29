@@ -1,18 +1,79 @@
 // App.js
 import React, { useState, useRef } from "react";
-import { View, Image, Pressable, Text, Alert } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { useNavigation } from '@react-navigation/native';
+import {
+  View,
+  Image,
+  Pressable,
+  Text,
+  Alert,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import colors from "./src/styles/colors";
-import globalStyles from "./src/styles/global";
-import typography from "./src/styles/typography";
 
-// COMPONENTES REUSÁVEIS (Header, PrimaryInput, PrimaryButton)
+//
+// 🎨 ESTILOS E CORES
+//
+const colors = {
+  primary: "#4CAF50",
+  secondary: "#1E90FF",
+  background: "#f2f2f2",
+  text: "#333333",
+  border: "#cccccc",
+  white: "#ffffff",
+};
 
-import { TextInput, StyleSheet, TouchableOpacity } from "react-native";
+const globalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: colors.background,
+  },
+  input: {
+    width: "100%",
+    height: 50,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    backgroundColor: colors.white,
+  },
+  button: {
+    width: "100%",
+    marginVertical: 15,
+  },
+});
 
-// Header Component
+const typography = StyleSheet.create({
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.text,
+    textAlign: "center",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+    marginBottom: 5,
+  },
+  link: {
+    color: colors.secondary,
+    fontSize: 16,
+    textDecorationLine: "underline",
+    marginTop: 10,
+    textAlign: "center",
+  },
+});
+
+//
+// 🧩 COMPONENTES REUTILIZÁVEIS
+//
 function Header({ title }) {
   return (
     <View style={headerStyles.header}>
@@ -32,10 +93,6 @@ const headerStyles = StyleSheet.create({
     borderBottomRightRadius: 15,
     marginBottom: 30,
     elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
   title: {
     fontSize: 22,
@@ -44,8 +101,14 @@ const headerStyles = StyleSheet.create({
   },
 });
 
-// PrimaryInput Component
-function PrimaryInput({ placeholder, value, onChangeText, secureTextEntry = false, keyboardType = "default", forwardedRef }) {
+function PrimaryInput({
+  placeholder,
+  value,
+  onChangeText,
+  secureTextEntry = false,
+  keyboardType = "default",
+  forwardedRef,
+}) {
   return (
     <TextInput
       style={globalStyles.input}
@@ -60,7 +123,6 @@ function PrimaryInput({ placeholder, value, onChangeText, secureTextEntry = fals
   );
 }
 
-// PrimaryButton Component
 function PrimaryButton({ title, onPress, disabled }) {
   return (
     <TouchableOpacity
@@ -92,8 +154,9 @@ const buttonStyles = StyleSheet.create({
   },
 });
 
-// Telas
-
+//
+// 📱 TELAS
+//
 function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -110,7 +173,7 @@ function LoginScreen({ navigation }) {
       <Header title="Bem-vindo" />
 
       <Image
-        source={require("./assets/logo.jpg")} // ajuste o caminho conforme seu projeto
+        source={require("./assets/logo.jpg")}
         style={{ width: 100, height: 100, marginBottom: 30 }}
       />
 
@@ -128,7 +191,11 @@ function LoginScreen({ navigation }) {
         secureTextEntry
       />
 
-      <PrimaryButton title="ENTRAR" onPress={handleLogin} disabled={!isFormValid} />
+      <PrimaryButton
+        title="ENTRAR"
+        onPress={handleLogin}
+        disabled={!isFormValid}
+      />
 
       <Pressable onPress={() => navigation.navigate("Registrar")}>
         <Text style={typography.link}>Registrar-se</Text>
@@ -147,7 +214,8 @@ function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  const isFormValid = cpf.trim() !== "" && nome.trim() !== "" && email.trim() !== "" && senha.trim() !== "";
+  const isFormValid =
+    cpf.trim() !== "" && nome.trim() !== "" && email.trim() !== "" && senha.trim() !== "";
 
   const handleRegister = () => {
     Alert.alert("Usuário registrado com sucesso!");
@@ -158,32 +226,15 @@ function RegisterScreen({ navigation }) {
     <View style={globalStyles.container}>
       <Header title="Cadastro de Usuário" />
 
-      <PrimaryInput
-        placeholder="CPF"
-        value={cpf}
-        onChangeText={setCpf}
-        keyboardType="numeric"
-      />
-
-      <PrimaryInput
-        placeholder="Nome"
-        value={nome}
-        onChangeText={setNome}
-      />
-
+      <PrimaryInput placeholder="CPF" value={cpf} onChangeText={setCpf} keyboardType="numeric" />
+      <PrimaryInput placeholder="Nome" value={nome} onChangeText={setNome} />
       <PrimaryInput
         placeholder="E-mail"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
       />
-
-      <PrimaryInput
-        placeholder="Senha"
-        value={senha}
-        onChangeText={setSenha}
-        secureTextEntry
-      />
+      <PrimaryInput placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
 
       <PrimaryButton title="Salvar" onPress={handleRegister} disabled={!isFormValid} />
 
@@ -200,13 +251,9 @@ function ResetPasswordScreen({ navigation }) {
   const passwordRef = useRef(null);
 
   const validatePasswordStrength = (pwd) => {
-    const minLength = /.{6,}/;
-    const hasUpper = /[A-Z]/;
-    const hasNumber = /\d/;
-
-    if (!minLength.test(pwd)) return "A senha deve ter pelo menos 6 caracteres";
-    if (!hasUpper.test(pwd)) return "A senha deve conter pelo menos uma letra maiúscula";
-    if (!hasNumber.test(pwd)) return "A senha deve conter pelo menos um número";
+    if (!/.{6,}/.test(pwd)) return "A senha deve ter pelo menos 6 caracteres";
+    if (!/[A-Z]/.test(pwd)) return "A senha deve conter pelo menos uma letra maiúscula";
+    if (!/\d/.test(pwd)) return "A senha deve conter pelo menos um número";
     return null;
   };
 
@@ -230,10 +277,7 @@ function ResetPasswordScreen({ navigation }) {
     }
 
     Alert.alert("Sucesso", "Senha redefinida com sucesso", [
-      {
-        text: "OK",
-        onPress: () => navigation.navigate("Login"),
-      },
+      { text: "OK", onPress: () => navigation.navigate("Login") },
     ]);
   };
 
@@ -266,9 +310,7 @@ function ResetPasswordScreen({ navigation }) {
 }
 
 function HomeScreen({ navigation }) {
-  const handleLogout = () => {
-    navigation.replace("Login");
-  };
+  const handleLogout = () => navigation.replace("Login");
 
   return (
     <View style={globalStyles.container}>
@@ -280,15 +322,12 @@ function HomeScreen({ navigation }) {
         <Pressable style={homeStyles.card} onPress={() => alert("Abrir Perfil")}>
           <Text style={homeStyles.cardText}>👤 Perfil</Text>
         </Pressable>
-
         <Pressable style={homeStyles.card} onPress={() => alert("Abrir Configurações")}>
           <Text style={homeStyles.cardText}>⚙️ Configurações</Text>
         </Pressable>
-
-        <Pressable style={homeStyles.card} onPress={() => navigation.navigate("Sobre")} >
+        <Pressable style={homeStyles.card} onPress={() => navigation.navigate("Sobre")}>
           <Text style={homeStyles.cardText}>ℹ️ Sobre</Text>
         </Pressable>
-
         <Pressable style={[homeStyles.card, homeStyles.logout]} onPress={handleLogout}>
           <Text style={homeStyles.cardText}>🚪 Sair</Text>
         </Pressable>
@@ -297,33 +336,29 @@ function HomeScreen({ navigation }) {
   );
 }
 
-// Aqui fica a construção da tela Sobre..
 function Sobre() {
   const navigation = useNavigation();
 
   return (
-    <View style={StyleSheet.container}>
-
-      <TouchableOpacity onPress={() => navigation.goBack()} style={StyleSheet.backButton}>
-        <Text style={StyleSheet.backButtonText}>← Voltar</Text>
+    <View style={sobreStyles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={sobreStyles.backButton}>
+        <Text style={sobreStyles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
 
-      <Text style={StyleSheet.title}>Sobre o App</Text>
-      <Text style={StyleSheet.text}>Esse app é feito para ajudar você com...</Text>
-      <Text style={StyleSheet.text}>Versão: 1.0.0</Text>
-      <Text style={StyleSheet.text}>Desenvolvido por: Lucas Joel</Text>
-
+      <Text style={sobreStyles.title}>Sobre o App</Text>
+      <Text style={sobreStyles.text}>
+        Esse app foi feito pelo trabalho de React Native para a aula do professor Marcio...
+      </Text>
+      <Text style={sobreStyles.text}>Versão: 1.0.0</Text>
+      <Text style={sobreStyles.text}>Desenvolvido por: Lucas Joel</Text>
     </View>
   );
 }
 
+//
+// 📌 STYLES ESPECÍFICOS
+//
 const homeStyles = StyleSheet.create({
- container:{
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
- },
   menu: {
     marginTop: 20,
     width: "100%",
@@ -335,10 +370,6 @@ const homeStyles = StyleSheet.create({
     marginVertical: 10,
     alignItems: "center",
     elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
   cardText: {
     fontSize: 18,
@@ -350,6 +381,38 @@ const homeStyles = StyleSheet.create({
   },
 });
 
+const sobreStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: colors.background,
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    padding: 10,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: colors.secondary,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  text: {
+    fontSize: 16,
+    color: colors.text,
+    marginBottom: 5,
+    textAlign: "center",
+  },
+});
+
+//
+// 🚀 APP PRINCIPAL
+//
 const Stack = createStackNavigator();
 
 export default function App() {
