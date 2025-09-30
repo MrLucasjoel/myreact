@@ -1,430 +1,315 @@
 // App.js
-import React, { useState, useRef } from "react";
+import 'react-native-gesture-handler'; // deve ser o primeiro import quando usar gesture handler
+import React, { useState } from 'react';
+import { enableScreens } from 'react-native-screens';
+enableScreens();
+
 import {
   View,
-  Image,
-  Pressable,
   Text,
-  Alert,
-  StyleSheet,
   TextInput,
-  TouchableOpacity,
-} from "react-native";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+  Pressable,
+  StyleSheet,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from 'react-native';
 
-//
-// 🎨 ESTILOS E CORES
-//
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// ----------------- CORES E ESTILOS GLOBAIS -----------------
 const colors = {
-  primary: "#4CAF50",
-  secondary: "#1E90FF",
-  background: "#f2f2f2",
-  text: "#333333",
-  border: "#cccccc",
-  white: "#ffffff",
+  primary: '#0D07A8',
+  secondary: '#FF9500',
+  background: '#F2F2F7',
+  text: '#1C1C1E',
+  white: '#FFFFFF',
+  danger: '#FF3B30',
 };
 
 const globalStyles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
     backgroundColor: colors.background,
   },
-  input: {
-    width: "100%",
-    height: 50,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    backgroundColor: colors.white,
-  },
-  button: {
-    width: "100%",
-    marginVertical: 15,
+  container: {
+    flex: 1,
+    padding: 20,
   },
 });
 
 const typography = StyleSheet.create({
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.text,
-    textAlign: "center",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 5,
-  },
-  link: {
-    color: colors.secondary,
-    fontSize: 16,
-    textDecorationLine: "underline",
-    marginTop: 10,
-    textAlign: "center",
-  },
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.text, marginBottom: 12 },
+  text: { fontSize: 16, color: colors.text },
 });
 
-//
-// 🧩 COMPONENTES REUTILIZÁVEIS
-//
+// ----------------- HEADER -----------------
 function Header({ title }) {
   return (
     <View style={headerStyles.header}>
-      <Text style={headerStyles.title}>{title}</Text>
+      <Text style={headerStyles.headerText}>{title}</Text>
     </View>
   );
 }
-
 const headerStyles = StyleSheet.create({
   header: {
-    width: "100%",
-    paddingVertical: 20,
+    padding: 14,
     backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
-    marginBottom: 30,
-    elevation: 5,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: colors.white,
-  },
-});
-
-function PrimaryInput({
-  placeholder,
-  value,
-  onChangeText,
-  secureTextEntry = false,
-  keyboardType = "default",
-  forwardedRef,
-}) {
-  return (
-    <TextInput
-      style={globalStyles.input}
-      placeholder={placeholder}
-      value={value}
-      onChangeText={onChangeText}
-      secureTextEntry={secureTextEntry}
-      keyboardType={keyboardType}
-      autoCapitalize="none"
-      ref={forwardedRef}
-    />
-  );
-}
-
-function PrimaryButton({ title, onPress, disabled }) {
-  return (
-    <TouchableOpacity
-      style={[buttonStyles.button, disabled && buttonStyles.disabled]}
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <Text style={buttonStyles.text}>{title}</Text>
-    </TouchableOpacity>
-  );
-}
-
-const buttonStyles = StyleSheet.create({
-  button: {
-    width: "100%",
-    paddingVertical: 15,
-    backgroundColor: colors.primary,
+    alignItems: 'center',
     borderRadius: 8,
-    alignItems: "center",
-    marginVertical: 10,
+    marginBottom: 12,
   },
-  text: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  disabled: {
-    backgroundColor: "#a5d6a7",
-  },
+  headerText: { fontSize: 18, fontWeight: 'bold', color: colors.white },
 });
 
-//
-// 📱 TELAS
-//
+// ----------------- TELAS -----------------
+
+// Login
 function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
 
-  const isFormValid = email.trim() !== "" && senha.trim() !== "";
-
-  const handleLogin = () => {
-    Alert.alert("Login realizado com sucesso!");
-    navigation.replace("Home");
-  };
+  const isFormValid = email.trim() !== '' && senha.trim() !== '';
 
   return (
-    <View style={globalStyles.container}>
-      <Header title="Bem-vindo" />
+    <SafeAreaView style={globalStyles.screen}>
+      <ScrollView contentContainerStyle={globalStyles.container} keyboardShouldPersistTaps="handled">
+        <Header title="Login" />
+        // ATENÇÃO: ajuste o require abaixo se não tiver logo.jpg
+        <Image
+          source={require('./assets/logo.jpg')}
+          style={{ width: 100, height: 100, alignSelf: 'center', marginBottom: 20 }}
+        />
+        <TextInput
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          style={authStyles.input}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          placeholder="Senha"
+          value={senha}
+          onChangeText={setSenha}
+          style={authStyles.input}
+          secureTextEntry
+        />
+        <Pressable
+          style={[authStyles.button, !isFormValid && authStyles.buttonDisabled]}
+          onPress={() => {
+            if (!isFormValid) {
+              Alert.alert('Preencha e-mail e senha');
+              return;
+            }
+            navigation.replace('Home');
+          }}
+        >
+          <Text style={authStyles.buttonText}>Entrar</Text>
+        </Pressable>
 
-      <Image
-        source={require("./assets/logo.jpg")}
-        style={{ width: 100, height: 100, marginBottom: 30 }}
-      />
+        <Pressable onPress={() => navigation.navigate('Registrar')}>
+          <Text style={authStyles.link}>Criar conta</Text>
+        </Pressable>
 
-      <PrimaryInput
-        placeholder="Digite seu e-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-
-      <PrimaryInput
-        placeholder="Digite sua senha"
-        value={senha}
-        onChangeText={setSenha}
-        secureTextEntry
-      />
-
-      <PrimaryButton
-        title="ENTRAR"
-        onPress={handleLogin}
-        disabled={!isFormValid}
-      />
-
-      <Pressable onPress={() => navigation.navigate("Registrar")}>
-        <Text style={typography.link}>Registrar-se</Text>
-      </Pressable>
-
-      <Pressable onPress={() => navigation.navigate("Redefinir Senha")}>
-        <Text style={typography.link}>Redefinir a Senha</Text>
-      </Pressable>
-    </View>
+        <Pressable onPress={() => navigation.navigate('Redefinir Senha')}>
+          <Text style={authStyles.link}>Esqueceu a senha?</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
+// Registrar
 function RegisterScreen({ navigation }) {
-  const [cpf, setCpf] = useState("");
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
 
-  const isFormValid =
-    cpf.trim() !== "" && nome.trim() !== "" && email.trim() !== "" && senha.trim() !== "";
-
-  const handleRegister = () => {
-    Alert.alert("Usuário registrado com sucesso!");
-    navigation.navigate("Login");
-  };
+  const isValid = nome.trim() && email.trim() && senha.trim();
 
   return (
-    <View style={globalStyles.container}>
-      <Header title="Cadastro de Usuário" />
-
-      <PrimaryInput placeholder="CPF" value={cpf} onChangeText={setCpf} keyboardType="numeric" />
-      <PrimaryInput placeholder="Nome" value={nome} onChangeText={setNome} />
-      <PrimaryInput
-        placeholder="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <PrimaryInput placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
-
-      <PrimaryButton title="Salvar" onPress={handleRegister} disabled={!isFormValid} />
-
-      <Pressable onPress={() => navigation.navigate("Login")}>
-        <Text style={typography.link}>Voltar para o Login</Text>
-      </Pressable>
-    </View>
+    <SafeAreaView style={globalStyles.screen}>
+      <ScrollView contentContainerStyle={globalStyles.container}>
+        <Header title="Registrar" />
+        <TextInput placeholder="Nome" value={nome} onChangeText={setNome} style={authStyles.input} />
+        <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={authStyles.input} />
+        <TextInput placeholder="Senha" value={senha} onChangeText={setSenha} style={authStyles.input} secureTextEntry />
+        <Pressable
+          style={[authStyles.button, !isValid && authStyles.buttonDisabled]}
+          onPress={() => {
+            if (!isValid) return Alert.alert('Preencha todos os campos');
+            navigation.replace('Home');
+          }}
+        >
+          <Text style={authStyles.buttonText}>Registrar</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
+// Redefinir Senha
 function ResetPasswordScreen({ navigation }) {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const passwordRef = useRef(null);
-
-  const validatePasswordStrength = (pwd) => {
-    if (!/.{6,}/.test(pwd)) return "A senha deve ter pelo menos 6 caracteres";
-    if (!/[A-Z]/.test(pwd)) return "A senha deve conter pelo menos uma letra maiúscula";
-    if (!/\d/.test(pwd)) return "A senha deve conter pelo menos um número";
-    return null;
-  };
-
-  const handleReset = () => {
-    if (password.trim() === "" || confirmPassword.trim() === "") {
-      Alert.alert("Erro", "Preencha todos os campos.");
-      return;
-    }
-
-    const error = validatePasswordStrength(password);
-    if (error) {
-      Alert.alert("Erro", error);
-      passwordRef.current?.focus();
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert("Erro", "Senhas não são iguais");
-      passwordRef.current?.focus();
-      return;
-    }
-
-    Alert.alert("Sucesso", "Senha redefinida com sucesso", [
-      { text: "OK", onPress: () => navigation.navigate("Login") },
-    ]);
-  };
+  const [email, setEmail] = useState('');
 
   return (
-    <View style={globalStyles.container}>
-      <Header title="Redefinir Senha" />
-
-      <PrimaryInput
-        forwardedRef={passwordRef}
-        placeholder="Digite a nova senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <PrimaryInput
-        placeholder="Confirme a nova senha"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
-
-      <PrimaryButton
-        title="Salvar"
-        onPress={handleReset}
-        disabled={password.trim() === "" || confirmPassword.trim() === ""}
-      />
-    </View>
+    <SafeAreaView style={globalStyles.screen}>
+      <ScrollView contentContainerStyle={globalStyles.container}>
+        <Header title="Redefinir Senha" />
+        <TextInput placeholder="Digite seu email" value={email} onChangeText={setEmail} style={authStyles.input} />
+        <Pressable
+          style={authStyles.button}
+          onPress={() => {
+            if (!email.trim()) return Alert.alert('Informe o e-mail');
+            Alert.alert('Link enviado', 'Verifique seu e-mail');
+            navigation.replace('Login');
+          }}
+        >
+          <Text style={authStyles.buttonText}>Enviar link</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
+// Home
 function HomeScreen({ navigation }) {
-  const handleLogout = () => navigation.replace("Login");
+  const handleLogout = () => navigation.replace('Login');
 
   return (
-    <View style={globalStyles.container}>
-      <Header title="Home" />
+    <SafeAreaView style={globalStyles.screen}>
+      <View style={globalStyles.container}>
+        <Header title="Home" />
+        <Text style={typography.title}>Bem-vindo à Home!</Text>
 
-      <Text style={typography.title}>Bem-vindo à Home!</Text>
+        <View style={homeStyles.menu}>
+          <Pressable
+            style={homeStyles.card}
+            onPress={() =>
+              navigation.navigate('Perfil', {
+                nome: 'Lucas Joel',
+                avatar:
+                  'https://cdn.pixabay.com/photo/2015/04/23/22/00/new-year-background-736885_1280.jpg',
+              })
+            }
+          >
+            <Text style={homeStyles.cardText}>👤 Perfil</Text>
+          </Pressable>
 
-      <View style={homeStyles.menu}>
-        <Pressable style={homeStyles.card} onPress={() => alert("Abrir Perfil")}>
-          <Text style={homeStyles.cardText}>👤 Perfil</Text>
-        </Pressable>
-        <Pressable style={homeStyles.card} onPress={() => alert("Abrir Configurações")}>
-          <Text style={homeStyles.cardText}>⚙️ Configurações</Text>
-        </Pressable>
-        <Pressable style={homeStyles.card} onPress={() => navigation.navigate("Sobre")}>
-          <Text style={homeStyles.cardText}>ℹ️ Sobre</Text>
-        </Pressable>
-        <Pressable style={[homeStyles.card, homeStyles.logout]} onPress={handleLogout}>
-          <Text style={homeStyles.cardText}>🚪 Sair</Text>
-        </Pressable>
+          <Pressable style={homeStyles.card} onPress={() => Alert.alert('Configurações')}>
+            <Text style={homeStyles.cardText}>⚙️ Configurações</Text>
+          </Pressable>
+
+          <Pressable style={homeStyles.card} onPress={() => navigation.navigate('Sobre')}>
+            <Text style={homeStyles.cardText}>ℹ️ Sobre</Text>
+          </Pressable>
+
+          <Pressable style={[homeStyles.card, homeStyles.logout]} onPress={handleLogout}>
+            <Text style={homeStyles.cardText}>🚪 Sair</Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
+// Sobre
 function Sobre() {
-  const navigation = useNavigation();
+  return (
+    <SafeAreaView style={globalStyles.screen}>
+      <View style={globalStyles.container}>
+        <Header title="Sobre" />
+        <Text style={typography.text}>
+          Este é um app exemplo criado com React Native + Navigation.
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+// Perfil (exibe foto + nome)
+function ProfileScreen({ route }) {
+  // leitura segura dos params (evita crash se route undefined)
+  const params = route?.params ?? {};
+  const nome = params.nome ?? 'Lucas Joel';
+  const avatar = params.avatar ?? null;
 
   return (
-    <View style={sobreStyles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={sobreStyles.backButton}>
-        <Text style={sobreStyles.backButtonText}>← Voltar</Text>
-      </TouchableOpacity>
-
-      <Text style={sobreStyles.title}>Sobre o App</Text>
-      <Text style={sobreStyles.text}>
-        Esse app foi feito pelo trabalho de React Native para a aula do professor Marcio...
-      </Text>
-      <Text style={sobreStyles.text}>Versão: 1.0.0</Text>
-      <Text style={sobreStyles.text}>Desenvolvido por: Lucas Joel</Text>
-    </View>
+    <SafeAreaView style={globalStyles.screen}>
+      <View style={profileStyles.container}>
+        {avatar ? (
+          <Image source={{ uri: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/new-year-background-736885_1280.jpg'
+          }} style={profileStyles.profileImage} />
+        ) : (
+          <View style={[profileStyles.profileImage, { backgroundColor: '#ccc' }]} />
+        )}
+        <Text style={profileStyles.name}>{nome}</Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
-//
-// 📌 STYLES ESPECÍFICOS
-//
-const homeStyles = StyleSheet.create({
-  menu: {
-    marginTop: 20,
-    width: "100%",
+// ----------------- STYLES -----------------
+const authStyles = StyleSheet.create({
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    backgroundColor: colors.white,
   },
-  card: {
+  button: {
     backgroundColor: colors.primary,
-    padding: 20,
-    borderRadius: 12,
-    marginVertical: 10,
-    alignItems: "center",
-    elevation: 3,
-  },
-  cardText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.white,
-  },
-  logout: {
-    backgroundColor: "#e53935",
-  },
-});
-
-const sobreStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: colors.background,
-  },
-  backButton: {
-    alignSelf: "flex-start",
-    padding: 10,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: colors.secondary,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
     marginBottom: 10,
   },
-  text: {
-    fontSize: 16,
-    color: colors.text,
-    marginBottom: 5,
-    textAlign: "center",
-  },
+  buttonText: { color: colors.white, fontSize: 16, fontWeight: 'bold' },
+  buttonDisabled: { opacity: 0.6 },
+  link: { color: colors.primary, textAlign: 'center', marginTop: 10 },
 });
 
-//
-// 🚀 APP PRINCIPAL
-//
-const Stack = createStackNavigator();
+const homeStyles = StyleSheet.create({
+  menu: { marginTop: 10 },
+  card: {
+    backgroundColor: colors.white,
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 12,
+    elevation: 2,
+  },
+  cardText: { fontSize: 16, color: colors.text },
+  logout: { backgroundColor: colors.danger },
+});
+
+const profileStyles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  profileImage: { width: 150, height: 150, borderRadius: 75, marginBottom: 16 },
+  name: { fontSize: 22, fontWeight: 'bold', color: colors.text },
+});
+
+// ----------------- NAV -----------------
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Registrar" component={RegisterScreen} />
-        <Stack.Screen name="Redefinir Senha" component={ResetPasswordScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Sobre" component={Sobre} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: true }}>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Registrar" component={RegisterScreen} />
+          <Stack.Screen name="Redefinir Senha" component={ResetPasswordScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Sobre" component={Sobre} />
+          <Stack.Screen name="Perfil" component={ProfileScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
