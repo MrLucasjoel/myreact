@@ -1,9 +1,8 @@
 // App.js
-import 'react-native-gesture-handler'; // deve ser o primeiro import quando usar gesture handler
-import React, { useState } from 'react';
+import 'react-native-gesture-handler';
+import React, { useState, useEffect } from 'react';
 import { enableScreens } from 'react-native-screens';
 enableScreens();
-
 import {
   View,
   Text,
@@ -14,13 +13,19 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  FlatList,
 } from 'react-native';
-
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { MaterialIcons } from '@expo/vector-icons';
+import axios from 'axios';
 
-// ----------------- CORES E ESTILOS GLOBAIS -----------------
+// ----------------- CONFIG -----------------
+const API_URL = "http://10.0.2.2:3000";
+// emulador Android use 10.0.2.2
+// celular físico use IP da sua máquina
+
 const colors = {
   primary: '#0D07A8',
   secondary: '#FF9500',
@@ -31,14 +36,8 @@ const colors = {
 };
 
 const globalStyles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
+  screen: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, padding: 20 },
 });
 
 const typography = StyleSheet.create({
@@ -71,14 +70,12 @@ const headerStyles = StyleSheet.create({
 function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-
   const isFormValid = email.trim() !== '' && senha.trim() !== '';
 
   return (
     <SafeAreaView style={globalStyles.screen}>
-      <ScrollView contentContainerStyle={globalStyles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={globalStyles.container}>
         <Header title="Login" />
-        // ATENÇÃO: ajuste o require abaixo se não tiver logo.jpg
         <Image
           source={require('./assets/logo.jpg')}
           style={{ width: 100, height: 100, alignSelf: 'center', marginBottom: 20 }}
@@ -101,10 +98,7 @@ function LoginScreen({ navigation }) {
         <Pressable
           style={[authStyles.button, !isFormValid && authStyles.buttonDisabled]}
           onPress={() => {
-            if (!isFormValid) {
-              Alert.alert('Preencha e-mail e senha');
-              return;
-            }
+            if (!isFormValid) return Alert.alert('Preencha e-mail e senha');
             navigation.replace('Home');
           }}
         >
@@ -128,7 +122,6 @@ function RegisterScreen({ navigation }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-
   const isValid = nome.trim() && email.trim() && senha.trim();
 
   return (
@@ -200,6 +193,11 @@ function HomeScreen({ navigation }) {
             <Text style={homeStyles.cardText}>👤 Perfil</Text>
           </Pressable>
 
+          <Pressable style={homeStyles.card} onPress={() => navigation.navigate('Loja')}>
+            <MaterialIcons name="store" size={24} color="black" />
+            <Text style={homeStyles.cardText}>Loja</Text>
+          </Pressable>
+
           <Pressable style={homeStyles.card} onPress={() => Alert.alert('Configurações')}>
             <Text style={homeStyles.cardText}>⚙️ Configurações</Text>
           </Pressable>
@@ -231,9 +229,8 @@ function Sobre() {
   );
 }
 
-// Perfil (exibe foto + nome)
+// Perfil
 function ProfileScreen({ route }) {
-  // leitura segura dos params (evita crash se route undefined)
   const params = route?.params ?? {};
   const nome = params.nome ?? 'Lucas Joel';
   const avatar = params.avatar ?? null;
@@ -242,12 +239,100 @@ function ProfileScreen({ route }) {
     <SafeAreaView style={globalStyles.screen}>
       <View style={profileStyles.container}>
         {avatar ? (
-          <Image source={{ uri: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/new-year-background-736885_1280.jpg'
-          }} style={profileStyles.profileImage} />
+          <Image source={{ uri: avatar }} style={profileStyles.profileImage} />
         ) : (
           <View style={[profileStyles.profileImage, { backgroundColor: '#ccc' }]} />
         )}
         <Text style={profileStyles.name}>{nome}</Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+// Loja (conectada ao MySQL via API)
+function LojaScreen() {
+  const [nome, setNome] = useState('');
+  const [preco, setPreco] = useState('');
+  const [itens, setItens] = useState([]);
+
+  const carregarItens = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/itens`);
+      setItens(res.data);
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Erro", "Não foi possível carregar itens");
+    }
+  };
+
+  const adicionarItem = async () => {
+    if (!nome || !preco) {
+      Alert.alert("Aviso", "Preencha nome e preço");
+      return;
+    }
+    try {
+      await axios.post(`${API_URL}/itens`, { nome, preco });
+      setNome('');
+      setPreco('');
+      carregarItens();
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Erro", "Não foi possível adicionar item");
+    }
+  };
+
+  const confirmarCompra = async () => {
+    try {
+      await axios.post(`${API_URL}/confirmar`);
+      carregarItens();
+      Alert.alert("Sucesso", "Compra confirmada!");
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Erro", "Não foi possível confirmar a compra");
+    }
+  };
+
+  useEffect(() => {
+    carregarItens();
+  }, []);
+
+  return (
+    <SafeAreaView style={globalStyles.screen}>
+      <View style={globalStyles.container}>
+        <Header title="Loja" />
+
+        <TextInput
+          style={authStyles.input}
+          placeholder="Nome do item"
+          value={nome}
+          onChangeText={setNome}
+        />
+        <TextInput
+          style={authStyles.input}
+          placeholder="Preço"
+          value={preco}
+          onChangeText={setPreco}
+          keyboardType="numeric"
+        />
+        <Pressable style={authStyles.button} onPress={adicionarItem}>
+          <Text style={authStyles.buttonText}>Adicionar</Text>
+        </Pressable>
+
+        <FlatList
+          data={itens}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <Text style={{ padding: 8 }}>
+              {item.nome} - R$ {item.preco}
+            </Text>
+          )}
+        />
+
+        {itens.length > 0 && (
+          <Pressable style={[authStyles.button, { backgroundColor: 'green' }]} onPress={confirmarCompra}>
+            <Text style={authStyles.buttonText}>Confirmar Compra</Text>
+          </Pressable>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -283,6 +368,9 @@ const homeStyles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 12,
     elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   cardText: { fontSize: 16, color: colors.text },
   logout: { backgroundColor: colors.danger },
@@ -308,6 +396,7 @@ export default function App() {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Sobre" component={Sobre} />
           <Stack.Screen name="Perfil" component={ProfileScreen} />
+          <Stack.Screen name="Loja" component={LojaScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

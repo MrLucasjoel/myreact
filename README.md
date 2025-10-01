@@ -13,3 +13,22 @@ react-native-screens react-native-safe-area-context
 8° npx react-native start --reset-cache
 9° npx react-native run-android
 10° expo start -c
+
+________________________________________________________________________
+
+criando o banco de dados MYSQL
+
+CREATE DATABASE loja_db;
+USE loja_db;
+
+CREATE TABLE itens (
+id INT AUTO_INCREMENT PRIMARY KEY,
+nome VARCHAR(100) NOT NULL,
+preco DECIMAL(10,2) NOT NULL
+);
+
+1° npm install axios
+
+
+
+--------------  node server.js
